@@ -76,14 +76,23 @@ namespace DDL_Parser {
   public class Field : NamedStatement {
     public string Type                          { get; set; }
     public Dictionary<string,string> Parameters { get; set; }
+    public List<Constraint>          Constraints { get; set; }
     public Field() {
       this.Parameters = new Dictionary<string,string>();
+      this.Constraints = new List<Constraint>();
     }
     public override string ToString() {
       return this.Name.ToString() + ":" + this.Type +
         "{" +
           string.Join(",", this.Parameters.Select(x => x.Key + "=" + x.Value)) +
-        "}";
+        "}" +
+        ( 
+          this.Constraints.Count > 0 ?
+            "<" +
+              string.Join(";", this.Constraints.Select(x => x.ToString())) +
+            ">"
+          : ""
+        );
     }
   }
 
@@ -110,6 +119,14 @@ namespace DDL_Parser {
     }
   }
 
+  public class CheckConstraint : Constraint {
+    public QualifiedName Field { get; set; }
+    public string        Rules { get; set; }
+    public override string ToString() {
+      return "check:" + this.Field.ToString() + ":=" + this.Rules;
+    }
+  }
+
   public class CreateTableStatement : CreateStatement {
     public QualifiedName             Database    { get; set; }
     public List<Field>               Fields      { get; set; }
@@ -126,12 +143,18 @@ namespace DDL_Parser {
         "["+
           string.Join(",", this.Fields) +
         "]"+
-        "<"+
-          string.Join(",", this.Constraints) +
-        ">"+
-        "{" +
-          string.Join(",", this.Parameters.Select(x => x.Key + "=" + x.Value)) +
-        "}";
+        ( this.Constraints.Count > 0 ?
+          "<"+
+            string.Join(",", this.Constraints) +
+          ">"
+          : ""
+        ) +
+        ( this.Parameters.Count > 0 ?
+          "{" +
+            string.Join(",", this.Parameters.Select(x => x.Key + "=" + x.Value)) +
+          "}"
+          : ""
+        );
     }
   }
 
