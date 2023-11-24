@@ -3,3 +3,4 @@ TestResult.xml
 Makefile.local
 bin
 obj
+.vs/DDL-Parser.csproj.dtbcache.json
